@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bookaroo!!</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="booking-container">
+  <h2>Book Ticket</h2>
+  <p id="selectedItem"></p>
+
+  <label>Number of Tickets:</label>
+  <input type="number" id="numTickets" min="1" value="1"/>
+  <p id="totalPrice">Total Price: ₹0</p>
+
+  <label>Date:</label>
+  <input type="date" id="date"/>
+
+  <div class="booking-buttons">
+    <button id="bookBtn">Book Now</button>
+    <button class="next-btn" onclick="goBack()">Back</button>
+  </div>
+</div>
+<script src="book.js"></script>
+<script>
+function goBack(){ window.location.href='available.html'; }
+</script>
+</body>
+</html>
