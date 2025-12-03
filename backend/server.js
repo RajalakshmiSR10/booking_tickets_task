@@ -9,10 +9,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// PORT FOR RENDER
 const PORT = process.env.PORT || 5000;
-const JWT_SECRET = process.env.JWT_SECRET;
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
+// SECRETS
+const JWT_SECRET = process.env.JWT_SECRET;
+
+// POSTGRES FOR RENDER (SSL REQUIRED)
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
 
 async function dbQuery(text, params) {
   const client = await pool.connect();
@@ -40,7 +47,7 @@ function authMiddleware(req, res, next) {
   }
 }
 
-//users
+// Register
 app.post("/api/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -64,7 +71,7 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
-//login users
+// Login
 app.post("/api/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -88,7 +95,7 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-//tickets
+// Available tickets
 app.get("/api/available", async (req, res) => {
   try {
     const result = await dbQuery(
@@ -116,14 +123,13 @@ app.get("/api/available", async (req, res) => {
   }
 });
 
-//bookings
+// Book tickets
 app.post("/api/bookings", authMiddleware, async (req, res) => {
   try {
     const { type, item_name, date, tickets } = req.body;
     if (!type || !item_name || !date || !tickets)
       return res.status(400).json({ message: "Missing fields" });
 
-    // Fetch the selected item
     const itemRes = await dbQuery(
       "SELECT id, available_tickets, price FROM available_tickets WHERE type=$1 AND name=$2",
       [type, item_name]
@@ -137,13 +143,11 @@ app.post("/api/bookings", authMiddleware, async (req, res) => {
 
     const totalPrice = item.price * tickets;
 
-    // Insert booking record
     const bookingRes = await dbQuery(
       "INSERT INTO bookings (user_id, type, item_name, date, tickets, price) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *",
       [req.userId, type, item_name, date, tickets, totalPrice]
     );
 
-    // Update available tickets
     await dbQuery(
       "UPDATE available_tickets SET available_tickets = available_tickets - $1 WHERE id=$2",
       [tickets, item.id]
@@ -156,7 +160,7 @@ app.post("/api/bookings", authMiddleware, async (req, res) => {
   }
 });
 
-//user bookings
+// Get bookings
 app.get("/api/bookings", authMiddleware, async (req, res) => {
   try {
     const result = await dbQuery(
@@ -169,6 +173,10 @@ app.get("/api/bookings", authMiddleware, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+app.get("/test", (req, res) => {
+  res.send("API working");
+});
 
 
-app.listen(PORT, () => console.log(` Server running on port ${PORT}`));
+// START SERVER
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
