@@ -173,6 +173,9 @@ app.get("/api/bookings", authMiddleware, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+app.get("/", (req, res) => {
+  res.send("Hello render");
+});
 app.get("/test", (req, res) => {
   res.send("API working");
 });
