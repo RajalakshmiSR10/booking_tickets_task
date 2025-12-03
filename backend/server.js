@@ -15,7 +15,9 @@ const PORT = process.env.PORT || 5000;
 // JWT secret
 const JWT_SECRET = process.env.JWT_SECRET || "dev_secret";
 
-// Conditional SSL for Render
+/
+
+// Determine if SSL is needed (Render Postgres requires SSL)
 const isProduction = process.env.DATABASE_URL && process.env.DATABASE_URL.includes("render.com");
 
 const pool = new Pool({
@@ -34,6 +36,8 @@ async function dbQuery(text, params) {
   }
 }
 
+
+
 // JWT middleware
 function authMiddleware(req, res, next) {
   const auth = req.headers["authorization"];
@@ -51,7 +55,6 @@ function authMiddleware(req, res, next) {
   }
 }
 
-// ----------------- ROUTES -----------------
 
 // DB test route
 app.get("/db-test", async (req, res) => {
@@ -116,7 +119,7 @@ app.post("/api/login", async (req, res) => {
 });
 
 // Available tickets
-app.get("/api/available_tickets", async (req, res) => {
+app.get("/api/available", async (req, res) => {
   try {
     const result = await dbQuery("SELECT id, type, name, price, available_tickets FROM available_tickets ORDER BY id");
     const buses = result.rows.filter((r) => r.type === "bus");
