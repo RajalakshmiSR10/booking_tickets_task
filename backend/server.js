@@ -116,7 +116,7 @@ app.post("/api/login", async (req, res) => {
 });
 
 // Available tickets
-app.get("/api/available", async (req, res) => {
+app.get("/api/available_tickets", async (req, res) => {
   try {
     const result = await dbQuery("SELECT id, type, name, price, available_tickets FROM available_tickets ORDER BY id");
     const buses = result.rows.filter((r) => r.type === "bus");
